@@ -2,7 +2,7 @@ package gift.common;
 
 import gift.member.exception.AuthenticationException;
 import gift.member.exception.DuplicatedException;
-import gift.option.excepiton.DuplicatedOptionNameException;
+import gift.option.excepiton.DuplicatedOptionException;
 import gift.option.excepiton.OptionNotFoundException;
 import gift.option.excepiton.OptionValidationException;
 import gift.product.exception.ProductNotFoundException;
@@ -125,8 +125,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(DuplicatedOptionNameException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateOptionName(DuplicatedOptionNameException e) {
+    @ExceptionHandler(DuplicatedOptionException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateOptionName(DuplicatedOptionException e) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "중복 옵션명",
                 e.getMessage()

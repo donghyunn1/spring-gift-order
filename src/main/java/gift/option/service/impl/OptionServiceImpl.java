@@ -2,7 +2,7 @@ package gift.option.service.impl;
 
 import gift.option.dto.OptionRequestDto;
 import gift.option.dto.OptionResponseDto;
-import gift.option.excepiton.DuplicatedOptionNameException;
+import gift.option.excepiton.DuplicatedOptionException;
 import gift.option.excepiton.OptionNotFoundException;
 import gift.option.excepiton.OptionValidationException;
 import gift.option.model.Option;
@@ -34,7 +34,7 @@ public class OptionServiceImpl implements OptionService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
         if (optionRespository.existsByProductIdAndName(productId, requestDto.name())) {
-            throw new DuplicatedOptionNameException("동일한 상품 내에 중복된 옵션명이 존재합니다: " + requestDto.name());
+            throw new DuplicatedOptionException("동일한 상품 내에 중복된 옵션명이 존재합니다: " + requestDto.name());
         }
 
         Option option = requestDto.toEntity(product);

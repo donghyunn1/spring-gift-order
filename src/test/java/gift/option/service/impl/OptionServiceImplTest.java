@@ -7,14 +7,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gift.option.dto.OptionRequestDto;
-import gift.option.excepiton.DuplicatedOptionNameException;
-import gift.option.excepiton.OptionValidationException;
 import gift.option.model.Option;
 import gift.option.repository.OptionRespository;
 import gift.product.exception.ProductNotFoundException;
 import gift.product.model.Product;
 import gift.product.repository.ProductRepository;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -94,11 +96,15 @@ class OptionServiceImplTest {
     void createOption_InvalidOptionName() {
         // given
         OptionRequestDto invalidRequest = new OptionRequestDto("옵션@#$", 50L);
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-        // when & then
-        assertThatThrownBy(() -> optionService.createOption(1L, invalidRequest))
-                .isInstanceOf(OptionValidationException.class)
-                .hasMessageContaining("허용되지 않은 특수문자");
+        // when - Bean Validation으로 검증
+        Set<ConstraintViolation<OptionRequestDto>> violations = validator.validate(invalidRequest);
+
+        // then
+        assertThat(violations).isNotEmpty();
+        assertThat(violations.iterator().next().getMessage())
+                .contains("허용되지 않은 특수문자");
     }
 
     @Test
