@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gift.option.dto.OptionRequestDto;
+import gift.option.excepiton.DuplicatedOptionException;
 import gift.option.model.Option;
 import gift.option.repository.OptionRespository;
 import gift.product.exception.ProductNotFoundException;
@@ -87,7 +88,7 @@ class OptionServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> optionService.createOption(1L, optionRequestDto))
-                .isInstanceOf(DuplicatedOptionNameException.class)
+                .isInstanceOf(DuplicatedOptionException.class)
                 .hasMessageContaining("중복된 옵션명이 존재합니다");
     }
 
