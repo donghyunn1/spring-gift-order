@@ -1,12 +1,13 @@
 package gift.kakao.config;
 
 import gift.kakao.dto.KakaoLoginResponse;
-import java.net.URI;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -14,12 +15,22 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class KakaoConfig {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public KakaoConfig(RestTemplateBuilder restTemplateBuilder, @Value("${kakao.api.base-url}") String baseUrl) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));
+        factory.setReadTimeout(Duration.ofSeconds(10));
+
+        this.restTemplate = restTemplateBuilder
+                .rootUri(baseUrl)
+                .requestFactory(() -> factory)  // RequestFactory 사용
+                .build();
+    }
 
     public KakaoLoginResponse getAccessToken(String code, String clientId, String redirectUri) {
-        var url = "https://kauth.kakao.com/oauth/token";
         var headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         var body = new LinkedMultiValueMap<String, String>();
         body.add("grant_type", "authorization_code");
@@ -27,12 +38,8 @@ public class KakaoConfig {
         body.add("redirect_uri", redirectUri);
         body.add("code", code);
 
-        var request = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(url));
+        HttpEntity<LinkedMultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<KakaoLoginResponse> response = restTemplate.exchange(
-                url, HttpMethod.POST, request, KakaoLoginResponse.class
-        );
-
-        return response.getBody();
+        return restTemplate.postForObject("/oauth/token", request, KakaoLoginResponse.class);
     }
 }
