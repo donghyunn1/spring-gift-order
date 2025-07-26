@@ -1,6 +1,7 @@
 package gift.kakao.controller;
 
 import gift.kakao.dto.KakaoCallbackResponse;
+import gift.kakao.exception.KakaoAuthException;
 import gift.kakao.service.KakaoLoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,7 @@ public class KakaoLoginController {
         try {
             String accessToken = kakaoLoginService.getAccessToken(code);
             return ResponseEntity.ok(KakaoCallbackResponse.success(accessToken));
-        } catch (Exception e) {
+        } catch (KakaoAuthException e) {
             return ResponseEntity.badRequest()
                     .body(KakaoCallbackResponse.failure("로그인 실패: " + e.getMessage()));
         }
