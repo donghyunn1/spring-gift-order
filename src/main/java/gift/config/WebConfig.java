@@ -3,10 +3,12 @@ package gift.config;
 import gift.interceptor.LoginInterceptor;
 import gift.jwt.auth.LoginMemberArgumentResolver;
 import java.util.List;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
@@ -23,7 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         "/api/members/register",
-                        "/api/members/login"
+                        "/api/members/login",
+                        "/api/products"
                 );
     }
 
