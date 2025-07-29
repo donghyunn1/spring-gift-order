@@ -24,22 +24,29 @@ public class KakaoClient {
 
         this.restTemplate = restTemplateBuilder
                 .rootUri(baseUrl)
-                .requestFactory(() -> factory)  // RequestFactory 사용
+                .requestFactory(() -> factory)
                 .build();
     }
 
     public KakaoLoginResponse getAccessToken(String code, String clientId, String redirectUri) {
-        var headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        try {
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        var body = new LinkedMultiValueMap<String, String>();
-        body.add("grant_type", "authorization_code");
-        body.add("client_id", clientId);
-        body.add("redirect_uri", redirectUri);
-        body.add("code", code);
+            var body = new LinkedMultiValueMap<String, String>();
+            body.add("grant_type", "authorization_code");
+            body.add("client_id", clientId);
+            body.add("redirect_uri", redirectUri);
+            body.add("code", code);
 
-        HttpEntity<LinkedMultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            HttpEntity<LinkedMultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        return restTemplate.postForObject("/oauth/token", request, KakaoLoginResponse.class);
+            KakaoLoginResponse response = restTemplate.postForObject("/oauth/token", request, KakaoLoginResponse.class);
+
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("카카오 토큰 발급 실패: " + e.getMessage(), e);
+        }
     }
 }

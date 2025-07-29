@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,11 +29,13 @@ public class OrderController {
     public ResponseEntity<OrderResponseDto> createOrder(
             @Valid @RequestBody OrderRequestDto requestDto,
             @LoginMember Member member,
-            HttpServletRequest request) {
+            @RequestHeader(value = "Kakao-Access-Token", required = false) String kakaoAccessToken) {
 
-        String kakaoAccessToken = (String) request.getSession().getAttribute("kakaoAccessToken");
-        OrderResponseDto orderResponse = orderService.createOrder(member.getId(), kakaoAccessToken,
-                requestDto);
+        OrderResponseDto orderResponse = orderService.createOrder(
+                member.getId(),
+                kakaoAccessToken,
+                requestDto
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
     }
