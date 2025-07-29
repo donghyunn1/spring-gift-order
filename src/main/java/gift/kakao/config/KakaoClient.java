@@ -13,11 +13,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class KakaoConfig {
+public class KakaoClient {
 
     private final RestTemplate restTemplate;
 
-    public KakaoConfig(RestTemplateBuilder restTemplateBuilder, @Value("${kakao.api.base-url}") String baseUrl) {
+    public KakaoClient(RestTemplateBuilder restTemplateBuilder, @Value("${kakao.api.base-url}") String baseUrl) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(5));
         factory.setReadTimeout(Duration.ofSeconds(10));
