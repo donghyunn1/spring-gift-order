@@ -42,13 +42,7 @@ public class OrderServiceImpl implements OrderService {
         Option option = optionRepository.findById(requestDto.optionId())
                 .orElseThrow(() -> new OptionNotFoundException("존재하지 않는 옵션입니다."));
 
-        if (option.getQuantity() < requestDto.quantity()) {
-            throw new InsufficientStockException(
-                    String.format("재고가 부족합니다. 현재 재고: %d개, 주문 수량: %d개", option.getQuantity(), requestDto.quantity())
-            );
-        }
-
-        option.subtractQuantity(requestDto.quantity());
+        option.processOrder(requestDto.quantity());
 
         Product product = option.getProduct();
         Optional<Wish> existingWish = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
