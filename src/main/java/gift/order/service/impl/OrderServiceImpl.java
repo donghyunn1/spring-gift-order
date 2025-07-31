@@ -44,20 +44,30 @@ public class OrderServiceImpl implements OrderService {
 
         option.processOrder(requestDto.quantity());
 
-        Product product = option.getProduct();
-        Optional<Wish> existingWish = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
-        existingWish.ifPresent(wishRepository::delete);
-
         Order order = requestDto.toEntity(memberId);
         Order savedOrder = orderRepository.save(order);
 
+        Product product = option.getProduct();
+        removeProductFromWishlistIfExists(memberId, product.getId());
+
+        sendKakaoOrderMessage(accessToken, product, option, savedOrder);
+
+        return OrderResponseDto.from(savedOrder);
+    }
+
+    private void sendKakaoOrderMessage(String accessToken, Product product, Option option, Order savedOrder) {
         try {
             sendKakaoMessage(accessToken, product, option, savedOrder);
         } catch (Exception e) {
             System.err.println("카카오톡 메시지 전송 실패: " + e.getMessage());
         }
+    }
 
-        return OrderResponseDto.from(savedOrder);
+    private void removeProductFromWishlistIfExists(Long memberId, Long productId) {
+        Optional<Wish> existingWish = wishRepository.findByMemberIdAndProductId(memberId, productId);
+        existingWish.ifPresent(wish -> {
+            wishRepository.delete(wish);
+        });
     }
 
     private void sendKakaoMessage(String accessToken, Product product, Option option, Order order) {
