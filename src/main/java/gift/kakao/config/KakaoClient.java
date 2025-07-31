@@ -44,7 +44,7 @@ public class KakaoClient {
             KakaoLoginResponse response = restTemplate.postForObject("/oauth/token", request, KakaoLoginResponse.class);
 
             return response;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             throw new RuntimeException("카카오 토큰 발급 실패: " + e.getMessage(), e);
         }
