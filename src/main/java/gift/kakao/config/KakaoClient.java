@@ -48,12 +48,29 @@ public class KakaoClient {
 
             return response;
         } catch (HttpClientErrorException e) {
-            throw new KakaoAuthException("잘못된 요청입니다. 4xx에러");
+            handleClientError(e);
         } catch (HttpServerErrorException e) {
-            throw new KakaoAuthException("카카오 서버 오류입니다. 5xx에러");
+            handleServerError(e);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw new RuntimeException("카카오 토큰 발급 실패: " + e.getMessage(), e);
+            throw new KakaoAuthException("카카오 토큰 발급 중 예상치 못한 오류가 발생했습니다: " + e.getMessage());
         }
+        return null;
+    }
+
+    private void handleClientError(HttpClientErrorException e) {
+        switch (e.getStatusCode().value()) {
+            case 400:
+                throw new KakaoAuthException("잘못된 요청입니다. 인증 코드나 파라미터를 확인해주세요.");
+            case 401:
+                throw new KakaoAuthException("카카오 인증에 실패했습니다. 클라이언트 ID를 확인해주세요.");
+            case 403:
+                throw new KakaoAuthException("카카오 API 접근 권한이 없습니다.");
+            default:
+                throw new KakaoAuthException("카카오 인증 요청이 실패했습니다.");
+        }
+    }
+
+    private void handleServerError(HttpServerErrorException e) {
+        throw new KakaoAuthException("카카오 서버 오류입니다. 잠시 후 다시 시도해주세요.");
     }
 }

@@ -1,5 +1,6 @@
 package gift.kakao.message;
 
+import gift.kakao.exception.KakaoMessageException;
 import java.time.Duration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -11,6 +12,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -45,12 +48,34 @@ public class KakaoMessageClient {
             ResponseEntity<String> response = restTemplate.postForEntity(SEND_ME_MESSAGE_URL, request, String.class);
 
             if (!response.getStatusCode().equals(HttpStatus.OK)) {
-                throw new RuntimeException(
-                        String.format("카카오톡 메시지 전송 실패 - 상태코드: %s, 응답: %s", response.getStatusCode(), response.getBody())
+                throw new KakaoMessageException(
+                        String.format("카카오톡 메시지 전송 실패 - 상태코드: %s, 응답: %s",
+                                response.getStatusCode(), response.getBody())
                 );
             }
-        } catch (Exception e) {
-            throw new RuntimeException("카카오톡 메시지 전송 중 오류가 발생했습니다: " + e.getMessage(), e);
+        } catch (HttpClientErrorException e) {
+            handleClientError(e);
+        } catch (HttpServerErrorException e) {
+            handleServerError(e);
+        } catch (RuntimeException e) {
+            throw new KakaoMessageException("카카오톡 메시지 전송 중 예상치 못한 오류가 발생했습니다: " + e.getMessage());
         }
+    }
+
+    private void handleClientError(HttpClientErrorException e) {
+        switch (e.getStatusCode().value()) {
+            case 400:
+                throw new KakaoMessageException("잘못된 메시지 템플릿 형식입니다.");
+            case 401:
+                throw new KakaoMessageException("카카오톡 메시지 전송 권한이 없습니다. 액세스 토큰을 확인해주세요.");
+            case 403:
+                throw new KakaoMessageException("카카오톡 메시지 API 사용 권한이 없습니다.");
+            default:
+                throw new KakaoMessageException("카카오톡 메시지 전송 요청이 실패했습니다.");
+        }
+    }
+
+    private void handleServerError(HttpServerErrorException e) {
+        throw new KakaoMessageException("카카오 서버에 오류입니다. 잠시 후 다시 시도해주세요.");
     }
 }
