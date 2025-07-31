@@ -5,6 +5,7 @@ import gift.member.exception.DuplicatedException;
 import gift.option.excepiton.DuplicatedOptionException;
 import gift.option.excepiton.OptionNotFoundException;
 import gift.option.excepiton.OptionValidationException;
+import gift.order.exception.InsufficientStockException;
 import gift.product.exception.ProductNotFoundException;
 import gift.product.exception.ProductValidationException;
 import gift.wishlist.exception.DuplicatedWishException;
@@ -132,6 +133,15 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientStock(InsufficientStockException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "재고 부족",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     public record ErrorResponse(String errorCode, String message) {}

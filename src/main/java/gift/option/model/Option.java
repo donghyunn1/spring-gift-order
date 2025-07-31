@@ -1,5 +1,6 @@
 package gift.option.model;
 
+import gift.order.exception.InsufficientStockException;
 import gift.product.model.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -72,5 +73,19 @@ public class Option {
             throw new IllegalArgumentException("재고가 부족합니다. 현재 재고: " + this.quantity + ", 요청 수량: " + amount);
         }
         this.quantity -= amount;
+    }
+
+    public void processOrder(Long requestedQuantity) {
+        validateStockAvailability(requestedQuantity);
+        subtractQuantity(requestedQuantity);
+    }
+
+    private void validateStockAvailability(Long requestedQuantity) {
+        if (!(this.quantity >= requestedQuantity)) {
+            throw new InsufficientStockException(
+                    String.format("재고가 부족합니다. 현재 재고: %d개, 주문 수량: %d개",
+                            this.quantity, requestedQuantity)
+            );
+        }
     }
 }

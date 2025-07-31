@@ -31,3 +31,14 @@ CREATE TABLE option (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     UNIQUE(product_id, name)
 );
+
+CREATE TABLE orders (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    member_id BIGINT NOT NULL,
+    option_id BIGINT NOT NULL,
+    quantity BIGINT NOT NULL,
+    order_date_time TIMESTAMP NOT NULL,
+    message VARCHAR(500),
+    FOREIGN KEY (member_id) REFERENCES members(id),
+    FOREIGN KEY (option_id) REFERENCES option(id)
+);
