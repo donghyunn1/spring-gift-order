@@ -6,7 +6,6 @@ import gift.option.excepiton.DuplicatedOptionException;
 import gift.option.excepiton.OptionNotFoundException;
 import gift.option.excepiton.OptionValidationException;
 import gift.order.exception.InsufficientStockException;
-import gift.order.exception.OrderNotFoundException;
 import gift.product.exception.ProductNotFoundException;
 import gift.product.exception.ProductValidationException;
 import gift.wishlist.exception.DuplicatedWishException;
@@ -134,15 +133,6 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException e) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                "주문을 찾을 수 없음",
-                e.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(InsufficientStockException.class)
